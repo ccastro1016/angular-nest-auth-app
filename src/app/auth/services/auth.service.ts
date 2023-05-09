@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'src/environments/environments';
 import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 
-import { AuthStatus, CheckTokenResponse, LoginResponse, User } from '../interfaces';
+import { AuthStatus, CheckTokenResponse, LoginResponse, RegisterResponse, User } from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -49,9 +49,21 @@ export class AuthService {
       );
   }
 
+  register(name: string, email: string, password: string): Observable<boolean>{
+    const url  = `${ this.baseUrl }/auth/register`;
+    const body = { name, email, password };
+
+    return this.http.post<RegisterResponse>( url, body )
+      .pipe(
+        map( ({ user, token }) => this.setAuthentication( user, token )),
+        catchError( err => throwError( () => err.error.message ))
+      );
+
+  }
+
   checkAuthStatus():Observable<boolean> {
 
-    const url   = `${ this.baseUrl }/auth/check-token`;
+    const url   = `${ this.baseUrl }/auth/check`;
     const token = localStorage.getItem('token');
 
     if ( !token ) {
